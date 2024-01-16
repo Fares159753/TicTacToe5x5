@@ -3,7 +3,6 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-// The main controller class for the Tic Tac Toe game
 public class GameController implements ActionListener {
     private JFrame frame;
     private JPanel titlePanel;
@@ -11,7 +10,7 @@ public class GameController implements ActionListener {
     private JButton restartButton;
     private boolean player1Turn;
     private GameBoard gameBoard;
-
+    private boolean gameOver;
     // Constructor to initialize the UI
     public GameController() {
         initializeUI();
@@ -72,7 +71,7 @@ public class GameController implements ActionListener {
         }
     }
 
-    // Method to handle a player's turn
+ // Method to handle a player's turn (modified for 5 symbols)
     private void performPlayerTurn(JButton clickedButton) {
         if (player1Turn) {
             clickedButton.setText("X");
@@ -85,12 +84,38 @@ public class GameController implements ActionListener {
         }
     }
 
-    // Method to check for a win
+
     private boolean checkForWin() {
-        // Check rows, columns, and diagonals...
-        // (Same as in the original code)
+        // Check rows
+        for (int i = 0; i < 10; i++) {
+            if (gameBoard.checkRowForWin(i)) {
+                System.out.println("Row win: " + i);
+                handleGameEnd(player1Turn ? "Player X wins!" : "Player O wins!");
+                return true;
+            }
+        }
+
+        // Check columns
+        for (int j = 0; j < 10; j++) {
+            if (gameBoard.checkColumnForWin(j)) {
+                System.out.println("Column win: " + j);
+                handleGameEnd(player1Turn ? "Player X wins!" : "Player O wins!");
+                return true;
+            }
+        }
+
+        // Check diagonals
+        if (gameBoard.checkDiagonalForWin() || gameBoard.checkReverseDiagonalForWin()) {
+            System.out.println("Diagonal win");
+            handleGameEnd(player1Turn ? "Player X wins!" : "Player O wins!");
+            return true;
+        }
+
         return false;
     }
+
+
+
 
     // Method to check for a tie
     private boolean checkForTie() {
@@ -99,33 +124,50 @@ public class GameController implements ActionListener {
         return false;
     }
 
-    // Method to restart the game
+
+ // Method to restart the game
     private void restartGame() {
-        JButton[][] buttons = gameBoard.getButtons();
-        for (int i = 0; i < 5; i++) {
-            for (int j = 0; j < 5; j++) {
-                buttons[i][j].setText("");
-                buttons[i][j].setEnabled(true);
+        // Reset button text and enable buttons using the GameBoard methods
+        for (int i = 0; i < 10; i++) {
+            for (int j = 0; j < 10; j++) {
+                gameBoard.setButtonText(i, j, ""); // Set the text to an empty string
+                gameBoard.enableButton(i, j);
             }
         }
 
+        // Reset title label and player turn
         titleLabel.setText("Player X's turn");
         player1Turn = true;
     }
 
-    // Method to handle the end of the game
+
     private void handleGameEnd(String result) {
         titleLabel.setText(result);
         JOptionPane.showMessageDialog(frame, result, "Game Over", JOptionPane.INFORMATION_MESSAGE);
+
+        // Disable all buttons when the game ends
+        disableButtons();
+
+        // Set the game over flag to true
+        gameOver = true;
     }
 
-    // Method to disable all buttons on the game board
+
+
+ // Method to disable all buttons on the game board
     private void disableButtons() {
-        JButton[][] buttons = gameBoard.getButtons();
-        for (int i = 0; i < 5; i++) {
-            for (int j = 0; j < 5; j++) {
-                buttons[i][j].setEnabled(false);
+        // Disable buttons using the GameBoard method
+        for (int i = 0; i < 10; i++) {
+            for (int j = 0; j < 10; j++) {
+                gameBoard.disableButton(i, j);
             }
         }
+    }
+
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            new GameController();
+        });
     }
 }
